@@ -2,12 +2,14 @@ package com.lukecycon.avro
 
 import java.io.ByteArrayOutputStream
 import org.apache.avro.io.EncoderFactory
+import org.apache.avro.file.BZip2Codec
+import java.nio.ByteBuffer
 import org.apache.avro.io.DecoderFactory
 
 object Avro {
   def schemaFor[T: AvroFormat] = implicitly[AvroFormat[T]].schema
 
-  def write[T: AvroFormat](thing: T): Array[Byte] = {
+  def write[T: AvroFormat](thing: T, compress: Boolean = false): Array[Byte] = {
     val out = new ByteArrayOutputStream
     val encoder = EncoderFactory.get.binaryEncoder(out, null)
 
@@ -15,14 +17,25 @@ object Avro {
 
     encoder.flush
 
-    out.toByteArray
+    if (compress) {
+      new BZip2Codec().compress(ByteBuffer.wrap(out.toByteArray)).array
+    } else {
+      out.toByteArray
+    }
   }
 
   def writeHex[T: AvroFormat](thing: T): String =
     byteArrayToHexString(write(thing))
 
-  def read[T: AvroFormat](bytes: Array[Byte]): Either[String, T] = {
-    val decoder = DecoderFactory.get.binaryDecoder(bytes, null)
+  def read[T: AvroFormat](bytes: Array[Byte],
+                          compressed: Boolean = false): Either[String, T] = {
+    val byts = if (compressed) {
+      new BZip2Codec().decompress(ByteBuffer.wrap(bytes)).array
+    } else {
+      bytes
+    }
+
+    val decoder = DecoderFactory.get.binaryDecoder(byts, null)
 
     implicitly[AvroFormat[T]].decodeValue(Nil, decoder)
   }

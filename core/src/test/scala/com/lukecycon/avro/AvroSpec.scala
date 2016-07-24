@@ -8,12 +8,21 @@ import org.scalacheck.Prop._
 
 class AvroSpec extends FreeSpec with Checkers {
 
-  def roundTrip[T : AvroFormat](v: T) = Avro.read(Avro.write(v))
+  def roundTrip[T: AvroFormat](v: T, comp: Boolean = false) =
+    Avro.read(Avro.write(v, comp), comp)
 
-  def checkPrimative[T : Arbitrary : AvroFormat](name: String) =
-    s"Avro roundTrip should be identity for $name" in {
-      check { i: T =>
-        roundTrip(i) == Right(i)
+  def checkPrimative[T: Arbitrary: AvroFormat](name: String) =
+    s"Avro roundTrip should be identity for $name" - {
+      "uncompressed" in {
+        check { i: T =>
+          roundTrip(i) == Right(i)
+        }
+      }
+
+      "compressed" in {
+        check { i: T =>
+          roundTrip(i, true) == Right(i)
+        }
       }
     }
 

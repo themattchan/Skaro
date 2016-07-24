@@ -32,9 +32,9 @@ res1: Boolean = true
     - [ ] Enums, mapping from both Java and Scala enums
 - [x] Schema specializations for some Scala types, such as `Option` and `Either`
 - [ ] Convenience methods for writing Avro Object Container Files
-- [ ] A non-standard data-only binary representation that optionally supports compression (that is, does not contain schema in serialized form)
+- [x] A non-standard data-only binary representation that optionally supports compression (that is, does not contain schema in serialized form)
     - [x] Non-compressed version
-    - [ ] Compressed version
+    - [x] Compressed version
 
 ## What we will not attempt to cover
 
@@ -75,7 +75,7 @@ data: scala.collection.immutable.Map[String,String] = Map(photo271 -> https://ph
                                                           photo38 -> https://photo.someawesome.site/user/123/607492334...
 ```
 
-We can use Skaro normal serialization method this data:
+We can use Skaro's normal serialization method this data:
 
 ```scala
 import com.lukecycon.avro._
